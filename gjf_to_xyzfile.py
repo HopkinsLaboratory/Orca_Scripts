@@ -7,11 +7,15 @@ Converts Gaussian input files to ORCA input files
 directory = r'D:\OneDrive\OneDrive - University of Waterloo\Waterloo\PhD\Manuscripts\2021\Mat_Comm_Today_Letter\Zimincka_structures\bCD_Atropine\Ziminicka'
 
 #Important things for the input block
-calc_line = '! DLPNO-CCSD(T) def2-TZVPP def2-TZVPP/C TightSCF  '  #Must be a string
+calc_line = '! wB97X-D3 Opt Freq def2-TZVPP def2/J RIJCOSX TightSCF'  #Must be a string
+#calc_line = '! DLPNO-CCSD(T) def2-TZVPP def2-TZVPP/C TightSCF  '  #Must be a string
 mpp = 8192  #Memory per processor in MB. Keep in increments of n*1024 otherwize orca gets confused
 ncores = 1  #Number of cores to use in the calculation 
 charge = 1  #What is the charge?
 multiplicity = 1    #What is the multiplicity?
+
+#Do you want partial charges to be calcualted by the ChelpG scheme? 
+ESP_Charges = True
 
 
 ##########################################################################
@@ -59,6 +63,13 @@ for filename in filenames:
         print('The number of cores specified is not an integer. You cannot have factional CPUs! Fixing it now')
         ncores = (round(ncores))
         opf.write('%pal nprocs '+str(ncores)+' \nend\n\n')
+
+#ESP Charges
+    if ESP_Charges == True:
+        opf.write(r'%chelpg'+'\n'
+        opf.write('grid 0.1\n')
+        opf.write('rmax 3.0\n')
+        opf.write('end\n\n')
 
 #File block
     opf.write('* xyzfile '+str(charge)+' '+str(multiplicity)+' '+str(filename)[:-4]+'.xyz\n\n\n\n')
