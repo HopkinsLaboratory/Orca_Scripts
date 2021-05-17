@@ -19,7 +19,7 @@ ESP_Charges = True  #Do you want custom parameters in the ChelpG scheme?
 grid = 0.1 #Default is 0.3
 rmax = 3.0 #Default is 2.8
 
-##########################################################################
+###########################################################################
 #No touchy past this point
 
 import os, re
