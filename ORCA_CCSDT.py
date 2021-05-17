@@ -6,6 +6,8 @@ Extractes CCSDT Single point energies directly from ORCA output files
 #Where are your ORCA outputs located?
 directory = r'H:\Hopkins_Laboratory\Tropylium\ORCA\NEB\OtBu\OtBu_Final1\CCSDT'
 
+###########################################
+#No touchy past this point
 import os, re
 
 #Generate list of ORCA outputs from directory
