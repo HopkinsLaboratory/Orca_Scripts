@@ -1,28 +1,28 @@
 '''
 Created by CI 2021-05-17
-Converts Gaussian input files to ORCA input files
+Converts Gaussian input (.gjf) files to ORCA input files
 '''
 
 #Where are your xyz files located?
-directory = r'D:\OneDrive\OneDrive - University of Waterloo\Waterloo\PhD\Manuscripts\2021\Mat_Comm_Today_Letter\Zimincka_structures\bCD_Atropine\Ziminicka'
+directory = r'D:\OneDrive\OneDrive - University of Waterloo\Waterloo\PhD\Manuscripts\2021\Mat_Comm_Today_Letter\Zimincka_structures\bCD_Atropine\Ziminicka\New folder'
 
 #Important things for the input block
-calc_line = '! wB97X-D3 Opt Freq def2-TZVPP def2/J RIJCOSX TightSCF'  #Must be a string
+calc_line = '! wB97X-D3 Opt Freq def2-TZVPP def2/J RIJCOSX TightSCF CHELPG'  #Must be a string
 #calc_line = '! DLPNO-CCSD(T) def2-TZVPP def2-TZVPP/C TightSCF  '  #Must be a string
 mpp = 8192  #Memory per processor in MB. Keep in increments of n*1024 otherwize orca gets confused
 ncores = 1  #Number of cores to use in the calculation 
 charge = 1  #What is the charge?
 multiplicity = 1    #What is the multiplicity?
 
-#Do you want partial charges to be calcualted by the ChelpG scheme? 
-ESP_Charges = True
-
+#ESP Charges
+ESP_Charges = True  #Do you want custom parameters in the ChelpG scheme? 
+grid = 0.1 #Default is 0.3
+rmax = 3.0 #Default is 2.8
 
 ##########################################################################
 #No touchy past this point
 
 import os
-from shutil import copyfile
 
 #Generate directory to write new files to
 try:
@@ -33,9 +33,9 @@ except FileExistsError:
 #Generate list of ORCA outputs from directory excluding xyz files that are trajectories from an optimization
 filenames = [x for x in os.listdir(directory) if x.lower().endswith('.gjf')]
 
-########################
+############################
 #Create ORCA file
-########################
+############################
 for filename in filenames:
     opf = open(directory+'\\New_Inputs\\'+filename[:-4]+'.inp','w')
 
@@ -66,20 +66,18 @@ for filename in filenames:
 
 #ESP Charges
     if ESP_Charges == True:
-        opf.write(r'%chelpg'+'\n'
-        opf.write('grid 0.1\n')
-        opf.write('rmax 3.0\n')
-        opf.write('end\n\n')
+        opf.write(r'%chelpg'+'\n')
+        opf.write('grid '+str(grid)+'\n')
+        opf.write('rmax '+str(rmax)+'\n')
+        opf.write('end\n\n\n')
 
 #File block
     opf.write('* xyzfile '+str(charge)+' '+str(multiplicity)+' '+str(filename)[:-4]+'.xyz\n\n\n\n')
     opf.close()
 
-
-########################
+############################
 #Create xyz file from .gjf
-########################
-
+############################
 
     opf = open(directory+'\\'+filename,'r')
     lines = opf.readlines()
@@ -96,12 +94,6 @@ for filename in filenames:
                     geom_index = line_index #write the index
                 geometry.append(lines[line_index].split())
 
-        #Find the number of atoms to write to the .xyz files
-        non_blank_count = 0 #Initial counter of non blank lines
-        for line in lines[geom_index:]:
-            if line.strip():
-                non_blank_count +=1
-
         #Write the geometry to a formatted string
         fs = ''
         for i in geometry:
@@ -109,8 +101,9 @@ for filename in filenames:
 
         #At long last, we can write all the info to the .xyz file
         opf = open(directory+'\\New_Inputs\\'+filename[:-4]+'.xyz','w')
-        opf.write(str(non_blank_count)+'\n\n')
+        opf.write(str(len(geometry))+'\n\n')
         opf.write(fs)
-        opf.write('\n\n\n\n\n')
+        opf.write('\n')
+        opf.close()
 
 print('Done')
