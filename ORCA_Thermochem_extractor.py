@@ -4,7 +4,7 @@ Created by CI 2021-04-15
 Extractes thermochemical qunatities directly from ORCA output files
 '''
 #Where are your ORCA outputs located?
-directory = r'H:\Hopkins_Laboratory\Tropylium\ORCA\NEB\OtBu\OtBu_Final1'
+directory = r'H:\Hopkins_Laboratory\Proton_Bound_Thermometer_Ions\Calculations\Ala\Dimer\DFT'
 
 import os, re, sys
 
@@ -15,7 +15,7 @@ filenames = [x for x in os.listdir(directory) if x.lower().endswith('.out')]
 #Generate output .csv to write thermochemistry to
 try:
     opf = open(directory+'//Thermo_data.csv','w')
-    opf.write('Filename,Electronic energy,ZPE Corr,Thermal Corr,H corr,G corr,ZPE Energy,Thermal Energy,Enthalpy,Entropy,Gibbs\n')
+    opf.write('Filename,Imaginary Frequencies,Electronic energy,ZPE Corr,Thermal Corr,H corr,G corr,ZPE Energy,Thermal Energy,Enthalpy,Entropy,Gibbs\n')
     opf.close()
 except PermissionError:
     print('A file with the same name is already open. Close it and rerun the code')
@@ -33,50 +33,55 @@ for filename in filenames:
     try:
         E_el = float(re.findall('FINAL SINGLE POINT ENERGY(.*?)\n',data)[-1].strip())
     except:
-        E_el = float(-12345)
+        E_el = float(12345)
     try:
         ZPE_corr = float(re.findall('Zero point energy                ...(.*?)Eh',data)[-1].strip())
     except:
-        ZPE_corr = float(-12345)
+        ZPE_corr = float(12345)
     try:
         Thermal_corr = float(re.findall('Total thermal correction(.*?)Eh',data)[-1].strip())
     except:
-        Thermal_corr = float(-12345)
+        Thermal_corr = float(12345)
     try:
         H_corr = float(re.findall('Thermal Enthalpy correction       ...(.*?)Eh',data)[-1].strip())
     except:
-        H_corr = float(-12345)
+        H_corr = float(12345)
     try:
         S_tot = float(re.findall('Final entropy term                ...(.*?)Eh',data)[-1].strip())
     except:
-        S_tot = float(-12345)
+        S_tot = float(12345)
     try:
         G_corr = float(re.findall(r'G-E\(el\)                           ...(.*?)Eh',data)[-1].strip())
     except:
-        G_corr = float(-12345)
+        G_corr = float(12345)
     try:
         E_thermal = float(re.findall('Total thermal energy(.*?)Eh',data)[-1].strip())
     except:
-        E_thermal = float(-12345)
+        E_thermal = float(12345)
     try:
         E_Enthalpy = float(re.findall('Total Enthalpy                    ...(.*?)Eh',data)[-1].strip())
     except:
-        E_Enthalpy = float(-12345)    
+        E_Enthalpy = float(12345)    
     try:
         E_Gibbs = float(re.findall('Final Gibbs free energy         ...(.*?)Eh',data)[-1].strip())
     except:
-        E_Gibbs = float(-12345)        
+        E_Gibbs = float(12345)        
     try:
         E_ZPE = float(E_el) + float(ZPE_corr)
     except:
-        E_ZPE = float(-12345)
-
-    if float(-12345) in [E_el,ZPE_corr,Thermal_corr,H_corr,G_corr,E_ZPE,E_thermal,E_Enthalpy,S_tot,E_Gibbs]:
-        print(str(filename)+' is missing thermochemistry. Writing -12345 as placeholder for missing value\n')
+        E_ZPE = float(12345)
+    try:
+        n_imag = data.count('***imaginary mode***')
+        if n_imag > 0:
+            print(filename+' contains '+str(n_imag)+' imaginary frequencies')
+    except:
+        pass
+    if float(12345) in [E_el,ZPE_corr,Thermal_corr,H_corr,G_corr,E_ZPE,E_thermal,E_Enthalpy,S_tot,E_Gibbs]:
+        print(str(filename)+' is missing thermochemistry. Writing -12345 as placeholder for missing value')
 
     #Append quantities to the thermochemistry .csv
     opf = open(directory+'//Thermo_data.csv','a')
-    opf.write('%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n'%(filename,E_el,ZPE_corr,Thermal_corr,H_corr,G_corr,E_ZPE,E_thermal,E_Enthalpy,S_tot,E_Gibbs))
+    opf.write('%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n'%(filename,n_imag,E_el,ZPE_corr,Thermal_corr,H_corr,G_corr,E_ZPE,E_thermal,E_Enthalpy,S_tot,E_Gibbs))
     opf.close()
 
 print('Done')
